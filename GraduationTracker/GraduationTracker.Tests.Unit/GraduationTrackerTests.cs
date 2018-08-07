@@ -5,84 +5,134 @@ using System.Linq;
 
 namespace GraduationTracker.Tests.Unit
 {
+    //Test that the function HasGraduated return something
     [TestClass]
     public class GraduationTrackerTests
     {
+        
+        GraduationTracker tracker = new GraduationTracker();
+
+        //Created a provider service class to get data used for UnitTest
+        MyDataProvider mydataprovider = new MyDataProvider();
+
         [TestMethod]
-        public void TestHasCredits()
+        public void TestHasGraduated()
         {
-            var tracker = new GraduationTracker();
-
-            var diploma = new Diploma
-            {
-                Id = 1,
-                Credits = 4,
-                Requirements = new int[] { 100, 102, 103, 104 }
-            };
-
-            var students = new[]
-            {
-               new Student
-               {
-                   Id = 1,
-                   Courses = new Course[]
-                   {
-                        new Course{Id = 1, Name = "Math", Mark=95 },
-                        new Course{Id = 2, Name = "Science", Mark=95 },
-                        new Course{Id = 3, Name = "Literature", Mark=95 },
-                        new Course{Id = 4, Name = "Physichal Education", Mark=95 }
-                   }
-               },
-               new Student
-               {
-                   Id = 2,
-                   Courses = new Course[]
-                   {
-                        new Course{Id = 1, Name = "Math", Mark=80 },
-                        new Course{Id = 2, Name = "Science", Mark=80 },
-                        new Course{Id = 3, Name = "Literature", Mark=80 },
-                        new Course{Id = 4, Name = "Physichal Education", Mark=80 }
-                   }
-               },
-            new Student
-            {
-                Id = 3,
-                Courses = new Course[]
-                {
-                    new Course{Id = 1, Name = "Math", Mark=50 },
-                    new Course{Id = 2, Name = "Science", Mark=50 },
-                    new Course{Id = 3, Name = "Literature", Mark=50 },
-                    new Course{Id = 4, Name = "Physichal Education", Mark=50 }
-                }
-            },
-            new Student
-            {
-                Id = 4,
-                Courses = new Course[]
-                {
-                    new Course{Id = 1, Name = "Math", Mark=40 },
-                    new Course{Id = 2, Name = "Science", Mark=40 },
-                    new Course{Id = 3, Name = "Literature", Mark=40 },
-                    new Course{Id = 4, Name = "Physichal Education", Mark=40 }
-                }
-            }
-
-
-            //tracker.HasGraduated()
-        };
-            
-            var graduated = new List<Tuple<bool, STANDING>>();
+            Diploma diploma = mydataprovider.getDiploma();
+            Student[] students = mydataprovider.getStudents(); 
+            var graduated = new List<Tuple<bool, Standing>>();
 
             foreach(var student in students)
             {
-                graduated.Add(tracker.HasGraduated(diploma, student));      
+                graduated.Add(tracker.HasGraduated(diploma, student));         
             }
-
             
-            Assert.IsFalse(graduated.Any());
+            Assert.IsTrue(graduated.Any());   //Fixed broken test by replacing IsFalse() with IsTrue()
 
         }
 
+        //Test the consistency of standing calculation logic
+        [TestMethod]
+        public void TestStanding()
+        {
+            Diploma diploma = mydataprovider.getDiploma();
+            Student[] students = mydataprovider.getStudents();
+            var graduated = new List<Tuple<bool, Standing>>();
+            Boolean res = true;
+            foreach (var student in students)
+            {
+                var standing = tracker.HasGraduated(diploma,student).Item2;
+                switch (student.Id)
+                {
+                    case 1:
+                        {
+                            if (standing != Standing.MagnaCumLaude)
+                            {
+                                res = false;
+                            }
+                            break;
+                        }
+                    case 2:
+                        {
+                            if (standing != Standing.MagnaCumLaude)
+                            {
+                                res = false;
+                            }
+                            break;
+                        }
+                    case 3:
+                        {
+                            if (standing != Standing.Average)
+                            {
+                                res = false;
+                            }
+                            break;
+                        }
+                    case 4:
+                        {
+                            if (standing != Standing.Remedial)
+                            {
+                                res = false;
+                            }
+                            break;
+                        }
+                }
+            }
 
+            Assert.IsTrue(res);
+
+        }
+
+        //Test the consistency of credit calculation logic
+        [TestMethod]
+        public void TestCredits()
+        {
+            Diploma diploma = mydataprovider.getDiploma();
+            Student[] students = mydataprovider.getStudents();
+            var graduated = new List<Tuple<bool, Standing>>();
+            Boolean res = true;
+            foreach (var student in students)
+            {
+                var credit = tracker.HasGraduated(diploma, student).Item1;
+                switch (student.Id)
+                {
+                    case 1:
+                        {
+                            if (!credit)
+                            {
+                                res = false;
+                            }
+                            break;
+                        }
+                    case 2:
+                        {
+                            if (!credit)
+                            {
+                                res = false;
+                            }
+                            break;
+                        }
+                    case 3:
+                        {
+                            if (!credit)
+                            {
+                                res = false;
+                            }
+                            break;
+                        }
+                    case 4:
+                        {
+                            if (credit)
+                            {
+                                res = false;
+                            }
+                            break;
+                        }
+                }
+            }
+
+            Assert.IsTrue(res);
+
+        }
     }
 }
